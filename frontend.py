@@ -496,17 +496,10 @@ class oligo_lcms_layout():
 
         self.map_tabs_obj = frontend_map_tabs.oligo_maps_tab()
 
-        self.map_tabs = html.Div([
-            dbc.Row([
-                self.map_tabs_obj.map_tab_,
-                self.map_tabs_obj.map_db_tab
-            ])
-        ])
-
         self.main_tabs = dbc.Tabs(
             [
                 dbc.Tab(self.lcms_layout, label = 'LCMS analyser'),
-                dbc.Tab(self.map_tabs, label = 'Maps tables')
+                dbc.Tab(self.map_tabs_obj.layout, label = 'Maps tables')
         ]
         )
 

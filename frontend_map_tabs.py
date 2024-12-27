@@ -94,3 +94,10 @@ class oligo_maps_tab():
                              },
             style={"height": 800, "width": '100%'},
         )
+
+        self.layout = html.Div([
+            dbc.Row([
+                self.map_tab_,
+                self.map_db_tab
+            ])
+        ])
