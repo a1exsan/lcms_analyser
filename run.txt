@@ -1,0 +1,1 @@
+sudo docker run -d -p 8550:8550 lsms_on_dash

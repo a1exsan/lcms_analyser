@@ -1,0 +1,13 @@
+pandas
+flask
+matplotlib
+mpld3
+plotly
+dash
+oligoMass
+tqdm
+molmass
+pymzml
+ipywidgets
+dash_bootstrap_components
+scipy
