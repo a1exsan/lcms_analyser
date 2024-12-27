@@ -2,6 +2,8 @@ from dash import dcc, html, dash_table
 import dash_bootstrap_components as dbc
 import pandas as pd
 
+import frontend_map_tabs
+
 
 class oligo_lcms_layout():
 
@@ -480,8 +482,9 @@ class oligo_lcms_layout():
             ]
         )
 
-        self.layout = html.Div([
-                dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App"), width='100%')),
+
+        self.lcms_layout = html.Div([
+                #dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App"), width='100%')),
                 dbc.Row(dbc.Col(self.upload_area)),
                 dbc.Row([
                     dbc.Col(self.graph_tabs),
@@ -490,6 +493,27 @@ class oligo_lcms_layout():
                 #dbc.Row(dbc.Textarea(id='textarea_out',
                 #                     style={'width': '50%', 'height': 300}))
 ])
+
+        self.map_tabs_obj = frontend_map_tabs.oligo_maps_tab()
+
+        self.map_tabs = html.Div([
+            dbc.Row([
+                self.map_tabs_obj.map_tab_,
+                self.map_tabs_obj.map_db_tab
+            ])
+        ])
+
+        self.main_tabs = dbc.Tabs(
+            [
+                dbc.Tab(self.lcms_layout, label = 'LCMS analyser'),
+                dbc.Tab(self.map_tabs, label = 'Maps tables')
+        ]
+        )
+
+        self.layout = html.Div([
+            dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App"), width='100%')),
+            self.main_tabs
+        ])
 
     def add_tag_to_tab(self, tag_tab):
         tag_tab = pd.DataFrame(tag_tab)

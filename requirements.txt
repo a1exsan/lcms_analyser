@@ -11,3 +11,4 @@ pymzml
 ipywidgets
 dash_bootstrap_components
 scipy
+dash_ag_grid
