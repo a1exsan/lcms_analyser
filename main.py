@@ -5,6 +5,13 @@ from dash.exceptions import PreventUpdate
 import dataViewer as dv
 import dataEditor as de
 import frontend
+import backend_oligomaps
+
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.251',
+#                                                  db_port='8012')
+
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1',
+                                                  db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -453,6 +460,39 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     raise PreventUpdate
 
 
+@callback(
+
+    Output(component_id='asm2000-map-tab', component_property='rowData'),
+    Output(component_id='asm2000-map-list-tab', component_property='rowData'),
+
+    Input(component_id='asm2000-map-tab', component_property='rowData'),
+    Input(component_id='asm2000-map-list-tab', component_property='rowData'),
+    Input(component_id='asm2000-map-tab', component_property='selectedRows'),
+    Input(component_id='asm2000-map-list-tab', component_property='selectedRows'),
+    Input(component_id='asm2000-show-maps-db-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-load-from-maps-db-btn', component_property='n_clicks'),
+    prevent_initial_call=True
+)
+def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,show_list_btn, load_map_btn):
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'asm2000-show-maps-db-btn' and show_list_btn is not None:
+        maps = oligo_maps.get_oligomaps()
+        if maps == []:
+            return map_data, map_list_data
+        else:
+            return map_data, maps
+
+    if triggered_id == 'asm2000-load-from-maps-db-btn' and load_map_btn is not None:
+        map = oligo_maps.load_oligomap(map_list_sel_data)
+        if map == []:
+            return map_data, map_list_data
+        else:
+            return map, map_list_data
+
+    raise PreventUpdate
+
+
 if __name__ == '__main__':
-    app.run_server(debug=True, host="0.0.0.0", port=8550, use_reloader=False)
+    app.run_server(debug=True, host="0.0.0.0", port=8550)
     
