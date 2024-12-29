@@ -339,7 +339,9 @@ class oligo_lcms_layout():
                 [
                     dbc.Row(dbc.Col(html.Br())),
                     dbc.Row([dbc.Col(dbc.Button("load data", id='load-db-data-button')),
-                            dbc.Col(dbc.Button("Update", id='update-db-data-button'))]),
+                            dbc.Col(dbc.Button("Update", id='update-db-data-button')),
+                            dbc.Col(dbc.Button("Save json", id='save-json-data-button'))
+                             ]),
                 ]
             )
         )

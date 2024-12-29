@@ -7,6 +7,7 @@ from datetime import datetime
 from oligoMass import molmassOligo as mmo
 import json
 import mz_oligo_identify as mzoi
+import pickle
 
 def substract_bkg(data, bkg, treshold=3000, rt_min=50, rt_max=1500):
     ret = []
@@ -232,6 +233,7 @@ class mzdataBuilder():
         self.selected_db_tab_row = 0
         self.deconv_fast = True
         self.mz_tags = []
+        self.deconv_data = pd.DataFrame()
 
         self.neighbor_treshold = 60
         self.low_intens_treshold = 1000
@@ -239,7 +241,20 @@ class mzdataBuilder():
 
         self.selected_mz_df = pd.DataFrame({})
 
+        self.db_on = False
         self.db_admin = db.lcms_db_admin('oligo_lcms_0.db')
+
+    def to_dict(self):
+        d = {}
+        d['init_data'] = self.init_data
+        d['deconv_data'] = self.deconv_data.to_dict('records')
+        d['mass_tags'] = self.mass_tags
+        d['mz_tags'] = self.mz_tags
+        return d
+
+    def to_pickle(self, fn):
+        with open(fn, 'wb') as f:
+            pickle.dump(self, f)
 
     def load_data(self, fn='', from_string='', description='', row_index=-1):
         if self.fileName != fn:

@@ -55,7 +55,10 @@ class oligo_maps_tab():
                 #'Status': ['in queue'],
                 'Dens, oe/ml': [0.],
                 'Vol, ml': [0.3],
-                'Purity, %': [50.]
+                'Purity, %': [50.],
+                'Do LCMS': [True],
+                'Done LCMS': [False],
+                'DONE': [False],
             }
         )
 
@@ -79,7 +82,11 @@ class oligo_maps_tab():
             #{"field": "Status", 'editable': False},
             {"field": "Dens, oe/ml", 'editable': True},
             {"field": "Vol, ml", 'editable': True},
-            {"field": "Purity, %", 'editable': True}
+            {"field": "Purity, %", 'editable': True},
+
+            {"field": "Do LCMS", 'editable': False},
+            {"field": "Done LCMS", 'editable': True},
+            {"field": "DONE", 'editable': True}
         ]
 
         self.map_tab_ = dag.AgGrid(
@@ -100,8 +107,14 @@ class oligo_maps_tab():
         self.buttons = dbc.Col([
             dbc.Button('Show content', id='asm2000-show-maps-db-btn',
                        outline=False, color="primary", className="me-1"),
-            dbc.Button('Load map', id='asm2000-load-from-maps-db-btn',
+            dbc.Button('Show in PROGRESS', id='asm2000-inprogress-maps-db-btn',
                        outline=False, color="success", className="me-1"),
+            dbc.Button('Load map', id='asm2000-load-from-maps-db-btn',
+                       outline=False, color="primary", className="me-1"),
+            dbc.Button('Save map', id='asm2000-save-from-maps-db-btn',
+                       outline=False, color="success", className="me-1"),
+            dbc.Button('Sel done', id='asm2000-seldone-from-maps-db-btn',
+                       outline=False, color="primary", className="me-1"),
         ])
 
         self.layout = html.Div([

@@ -6,12 +6,11 @@ import dataViewer as dv
 import dataEditor as de
 import frontend
 import backend_oligomaps
+import json
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.251',
-#                                                  db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.251', db_port='8012')
 
-oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1',
-                                                  db_port='8012')
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -321,9 +320,12 @@ def update_oligo_sequence_props(sequence, button_click):
     Input('db-content-table', 'active_cell'),
     Input('load-db-data-button', 'n_clicks'),
     Input('update-db-data-button', 'n_clicks'),
+    Input('save-json-data-button', 'n_clicks'),
+    Input(component_id='asm2000-map-tab', component_property='selectedRows'),
     prevent_initial_call=True
 )
-def db_content_update(active_cell, load_button_click, update_button_click):
+def db_content_update(active_cell, load_button_click, update_button_click, save_json_data_btn,
+                      map_tab_sel):
     triggered_id = ctx.triggered_id
 
     if triggered_id == 'db-content-table' and active_cell is not None:
@@ -343,6 +345,10 @@ def db_content_update(active_cell, load_button_click, update_button_click):
         return graph_mass.figure, taging_data, Patch()
 
     if triggered_id == 'update-db-data-button' and update_button_click is not None:
+        return graph_mass.figure, Patch(), data.db_admin.get_content_tab().to_dict('records')
+
+    if triggered_id == 'save-json-data-button' and save_json_data_btn is not None:
+        oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel)
         return graph_mass.figure, Patch(), data.db_admin.get_content_tab().to_dict('records')
 
     raise PreventUpdate
@@ -471,9 +477,13 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     Input(component_id='asm2000-map-list-tab', component_property='selectedRows'),
     Input(component_id='asm2000-show-maps-db-btn', component_property='n_clicks'),
     Input(component_id='asm2000-load-from-maps-db-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-save-from-maps-db-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-seldone-from-maps-db-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-inprogress-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,show_list_btn, load_map_btn):
+def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,show_list_btn, load_map_btn, save_map_btn,
+                    seldone_btn, inprogress_btn):
     triggered_id = ctx.triggered_id
 
     if triggered_id == 'asm2000-show-maps-db-btn' and show_list_btn is not None:
@@ -489,6 +499,18 @@ def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,sho
             return map_data, map_list_data
         else:
             return map, map_list_data
+
+    if triggered_id == 'asm2000-save-from-maps-db-btn' and save_map_btn is not None:
+        status = oligo_maps.save_map(map_data)
+        return map_data, map_list_data
+
+    if triggered_id == 'asm2000-seldone-from-maps-db-btn' and seldone_btn is not None:
+        map = oligo_maps.sel_done(map_data, map_sel_data)
+        return map, map_list_data
+
+    if triggered_id == 'asm2000-inprogress-maps-db-btn' and inprogress_btn is not None:
+        map_list = oligo_maps.show_map_list_in_progress()
+        return map_data, map_list
 
     raise PreventUpdate
 
