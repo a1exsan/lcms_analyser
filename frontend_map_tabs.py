@@ -89,6 +89,7 @@ class oligo_maps_tab():
             {"field": "DONE", 'editable': True}
         ]
 
+
         self.map_tab_ = dag.AgGrid(
             id="asm2000-map-tab",
             columnDefs=columnDefs,

@@ -346,6 +346,7 @@ class oligo_lcms_layout():
             )
         )
 
+
         self.db_content_board = dbc.Container(
             html.Div([
                 dbc.Row(dbc.Col(html.Br())),

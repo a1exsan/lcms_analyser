@@ -95,4 +95,5 @@ class oligomaps_local_db():
             url = f'{self.api_db_url}/post_lcms_json_data/{file_name}'
             ret = requests.post(url, json=json.dumps(json_data, cls=NumpyEncoder))
             return ret
+
         return 404

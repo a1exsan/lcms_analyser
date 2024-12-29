@@ -234,13 +234,10 @@ class mzdataBuilder():
         self.deconv_fast = True
         self.mz_tags = []
         self.deconv_data = pd.DataFrame()
-
         self.neighbor_treshold = 60
         self.low_intens_treshold = 1000
         self.bkg_polish_count = 1
-
         self.selected_mz_df = pd.DataFrame({})
-
         self.db_on = False
         self.db_admin = db.lcms_db_admin('oligo_lcms_0.db')
 

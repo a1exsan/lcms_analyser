@@ -353,6 +353,7 @@ def db_content_update(active_cell, load_button_click, update_button_click, save_
 
     raise PreventUpdate
 
+
 @callback(
 
     Output(component_id='fragment_table', component_property='data', allow_duplicate=True),
