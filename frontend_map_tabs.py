@@ -118,6 +118,8 @@ class oligo_maps_tab():
                        outline=False, color="primary", className="me-1"),
             dbc.Button('Put sequence', id='asm2000-put-sequence-from-maps-db-btn',
                        outline=False, color="success", className="me-1"),
+            dbc.Button('Load LCMS data', id='asm2000-load-lcms-data-from-maps-db-btn',
+                       outline=False, color="primary", className="me-1"),
         ])
 
         self.layout = html.Div([

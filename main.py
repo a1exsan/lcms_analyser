@@ -8,6 +8,8 @@ import frontend
 import backend_oligomaps
 import json
 
+from backend_oligomaps import NumpyEncoder
+
 #oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.251', db_port='8012')
 
 oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
@@ -471,7 +473,9 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
 
     Output(component_id='asm2000-map-tab', component_property='rowData'),
     Output(component_id='asm2000-map-list-tab', component_property='rowData'),
+    Output(component_id='app-main-message', component_property='children', allow_duplicate=True),
 
+    Input(component_id='app-main-message', component_property='children'),
     Input(component_id='asm2000-map-tab', component_property='rowData'),
     Input(component_id='asm2000-map-list-tab', component_property='rowData'),
     Input(component_id='asm2000-map-tab', component_property='selectedRows'),
@@ -483,40 +487,41 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     Input(component_id='asm2000-inprogress-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,show_list_btn, load_map_btn, save_map_btn,
-                    seldone_btn, inprogress_btn):
+def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_list_sel_data, show_list_btn, load_map_btn,
+                    save_map_btn, seldone_btn, inprogress_btn):
     triggered_id = ctx.triggered_id
 
     if triggered_id == 'asm2000-show-maps-db-btn' and show_list_btn is not None:
         maps = oligo_maps.get_oligomaps()
         if maps == []:
-            return map_data, map_list_data
+            return map_data, map_list_data, main_app_msg
         else:
-            return map_data, maps
+            return map_data, maps, main_app_msg
 
     if triggered_id == 'asm2000-load-from-maps-db-btn' and load_map_btn is not None:
         map = oligo_maps.load_oligomap(map_list_sel_data)
         if map == []:
-            return map_data, map_list_data
+            return map_data, map_list_data, main_app_msg
         else:
-            return map, map_list_data
+            return map, map_list_data, main_app_msg
 
     if triggered_id == 'asm2000-save-from-maps-db-btn' and save_map_btn is not None:
         status = oligo_maps.save_map(map_data)
-        return map_data, map_list_data
+        return map_data, map_list_data, main_app_msg
 
     if triggered_id == 'asm2000-seldone-from-maps-db-btn' and seldone_btn is not None:
         map = oligo_maps.sel_done(map_data, map_sel_data)
-        return map, map_list_data
+        return map, map_list_data, main_app_msg
 
     if triggered_id == 'asm2000-inprogress-maps-db-btn' and inprogress_btn is not None:
         map_list = oligo_maps.show_map_list_in_progress()
-        return map_data, map_list
+        return map_data, map_list, main_app_msg
 
     raise PreventUpdate
 
 @callback(
     Output(component_id='tagging_table', component_property='data', allow_duplicate=True),
+    Output(component_id='Scatter-mzdata', component_property='figure', allow_duplicate=True),
     Output(component_id='Scatter-mass-data', component_property='figure', allow_duplicate=True),
     Output(component_id='oligo-sequence', component_property='value', allow_duplicate=True),
     Output(component_id='sequence-tag', component_property='value', allow_duplicate=True),
@@ -528,18 +533,23 @@ def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,sho
     Input(component_id='app-main-message', component_property='children'),
     Input(component_id='tagging_table', component_property='data'),
     Input(component_id='Scatter-mass-data', component_property='figure'),
+    Input(component_id='Scatter-mzdata', component_property='figure'),
     Input(component_id='oligo-sequence', component_property='value'),
     Input(component_id='sequence-tag', component_property='value'),
     Input(component_id='selected-tag', component_property='value'),
     Input(component_id='save-lcms-data-btn', component_property='n_clicks'),
+    Input(component_id='add-lcms-data-purity-btn', component_property='n_clicks'),
     Input(component_id='asm2000-map-tab', component_property='selectedRows'),
+    Input(component_id='asm2000-map-list-tab', component_property='selectedRows'),
     Input(component_id='save-lcms-data-status', component_property='children'),
     Input(component_id='asm2000-map-tab', component_property='rowData'),
     Input(component_id='asm2000-put-sequence-from-maps-db-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-load-lcms-data-from-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def update_lcms_data(main_app_msg, tag_table, mass_figure, oligo_seq, sequence_tag, tag_name,
-                     save_lcms_data_btn, map_tab_sel, status_save_data, map_tab_data, put_sequence_btn):
+def update_lcms_data(main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq, sequence_tag, tag_name,
+                     save_lcms_data_btn, add_to_purity, map_tab_sel, map_list_tab_sel, status_save_data, map_tab_data,
+                     put_sequence_btn, load_lcms_data_btn):
 
     triggered_id = ctx.triggered_id
 
@@ -547,13 +557,40 @@ def update_lcms_data(main_app_msg, tag_table, mass_figure, oligo_seq, sequence_t
         status, map_out_data = oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel, map_tab_data)
         if status.status_code == 200:
             oligo_maps.save_map(map_out_data)
-        return tag_table, mass_figure, oligo_seq, sequence_tag, tag_name, status.text, map_out_data, main_app_msg
+        return (tag_table, mz_figure, mass_figure, oligo_seq, sequence_tag, tag_name, status.text, map_out_data,
+                main_app_msg)
 
     if triggered_id == 'asm2000-put-sequence-from-maps-db-btn' and put_sequence_btn is not None:
         sequence = map_tab_sel[0]['Sequence']
         main_msg = 'LCMS analysis App'
         main_msg += f" (sample position: {map_tab_sel[0]['Position']}; synth: {map_tab_sel[0]['Synt number']})"
-        return tag_table, mass_figure, sequence, sequence, 'main', status_save_data, map_tab_data, main_msg
+        return (tag_table, mz_figure, mass_figure, sequence, sequence, 'main', status_save_data, map_tab_data, main_msg)
+
+    if triggered_id == 'asm2000-load-lcms-data-from-maps-db-btn' and load_lcms_data_btn is not None:
+        load_data = oligo_maps.load_lcms_data(map_list_tab_sel, map_tab_sel)
+        if load_data.status_code == 200:
+            out_msg = data.lcms_data_loading(load_data.json())
+
+            graph_mz.set_data(data.get_init_x(),
+                              data.get_init_y(),
+                              data.get_init_z())
+
+            graph_mass.set_data(data.deconv_data['rt'],
+                                data.deconv_data['mass'],
+                                data.deconv_data['intens'])
+
+            taging_data = frontend_obj.add_tag_to_tab(data.mass_tags)
+
+            return (taging_data, graph_mz.figure, graph_mass.figure, oligo_seq, sequence_tag, tag_name, str(load_data),
+                    map_tab_data, f'LCMS analysis App ({out_msg})')
+        return (tag_table, mz_figure, mass_figure, oligo_seq, sequence_tag, tag_name, str(load_data), map_tab_data,
+                main_app_msg)
+
+    if triggered_id == 'add-lcms-data-purity-btn' and add_to_purity is not None:
+        map_out_data = oligo_maps.add_data_to_purity_tab(data.mass_tags, data.selected_tag_row, map_tab_data)
+        oligo_maps.save_map(map_out_data)
+        return (tag_table, mz_figure, mass_figure, oligo_seq, sequence_tag, tag_name, status_save_data, map_out_data,
+                main_app_msg)
 
     raise PreventUpdate
 

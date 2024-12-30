@@ -241,11 +241,27 @@ class mzdataBuilder():
         self.db_on = False
         self.db_admin = db.lcms_db_admin('oligo_lcms_0.db')
 
+    def lcms_data_loading(self, data):
+        self.mass_tags = data['mass_tags']
+        self.mz_tags = data['mz_tags']
+
+        df = pd.DataFrame(data['init_data'])
+        self.init_data = np.array([[rt, mz, intens] for rt, mz, intens in zip(df['rt'], df['mz'], df['intens'])])
+        #print(self.init_data)
+        self.deconv_data = pd.DataFrame(data['deconv_data'])
+
+        return f"sample position: {data['Position']}; order id: {data['Order id']}"
+
     def to_dict(self):
         d = {}
-        d['init_data'] = self.init_data
+        #d['init_data'] = self.init_data
+        d['init_data'] = pd.DataFrame({
+            'rt': self.init_data[:, 0],
+            'mz': self.init_data[:, 1],
+            'intens': self.init_data[:, 2],
+        }).to_dict('records')
         d['deconv_data'] = self.deconv_data.to_dict('records')
-        d['mass_tags'] = self.mass_tags
+        d['mass_tags'] = self.text_to_mass_tags(self.mass_tags_to_text())
         d['mz_tags'] = self.mz_tags
         return d
 

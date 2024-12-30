@@ -301,8 +301,12 @@ class oligo_lcms_layout():
         self.oligo_save_lcms_data_box = dbc.Container(
             dbc.Row([
                 html.H3("", id='gag-001'),
-                dbc.Button("save LCMS data", id='save-lcms-data-btn',
-                           outline=False, color="success", className="me-1"),
+                dbc.Col([
+                    dbc.Button("save LCMS data", id='save-lcms-data-btn',
+                               outline=False, color="success", className="me-1"),
+                    dbc.Button("add to purity", id='add-lcms-data-purity-btn',
+                               outline=False, color="primary", className="me-1"),
+                ]),
                 html.H3("", id='gag-002'),
                 html.H6("status", id='save-lcms-data-status')
             ])

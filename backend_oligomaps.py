@@ -94,7 +94,9 @@ class oligomaps_local_db():
 
             file_name = f'{self.oligo_map_id}_{self.oligo_id}_{self.oligo_pos}'
             url = f'{self.api_db_url}/post_lcms_json_data/{file_name}'
-            ret = requests.post(url, json=json.dumps(json_data, cls=NumpyEncoder))
+            #ret = requests.post(url, json=json.dumps(json_data, cls=NumpyEncoder))
+            #print(json_data)
+            ret = requests.post(url, json=json.dumps(json_data))
 
             if ret.status_code == 200:
                 df.loc[df['Position'] == self.oligo_pos, 'Done LCMS'] = True
@@ -102,3 +104,30 @@ class oligomaps_local_db():
             return ret, df.to_dict('records')
 
         return '', df.to_dict('records')
+
+    def load_lcms_data(self, map_list_selection, map_selection):
+        if (len(map_list_selection) > 0) and (len(map_selection) > 0):
+            self.oligo_map_id = map_list_selection[0]['#']
+            self.oligo_id = map_selection[0]['Order id']
+            self.oligo_pos = map_selection[0]['Position']
+
+            file_name = f'{self.oligo_map_id}_{self.oligo_id}_{self.oligo_pos}'
+            url = f'{self.api_db_url}/get_lcms_json_data/{file_name}'
+            ret = requests.get(url)
+
+            return ret
+
+
+    def add_data_to_purity_tab(self, mass_tags, row_index, rowdata):
+        df = pd.DataFrame(rowdata)
+        if self.oligo_id > -1:
+            df.loc[df['Position'] == self.oligo_pos, 'Purity, %'] = round(float(mass_tags[row_index]['area%']), 0)
+        return df.to_dict('records')
+
+
+
+
+
+
+
+
