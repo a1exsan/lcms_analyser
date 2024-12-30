@@ -298,12 +298,25 @@ class oligo_lcms_layout():
                                                 }
                                                 )
 
+        self.oligo_save_lcms_data_box = dbc.Container(
+            dbc.Row([
+                html.H3("", id='gag-001'),
+                dbc.Button("save LCMS data", id='save-lcms-data-btn',
+                           outline=False, color="success", className="me-1"),
+                html.H3("", id='gag-002'),
+                html.H6("status", id='save-lcms-data-status')
+            ])
+        )
+
         self.tagging_param_board = dbc.Container(
             html.Div(
                 [
                     dbc.Row(dbc.Col(html.Br())),
-                    dbc.Row([dbc.Col(self.selection_processing_buttons, width='auto'),
-                            dbc.Col(self.oligo_mass_calculation_box, width='auto')]),
+                    dbc.Row([
+                        dbc.Col(self.selection_processing_buttons, width='auto'),
+                        dbc.Col(self.oligo_mass_calculation_box, width='auto'),
+                        self.oligo_save_lcms_data_box
+                             ]),
                     dbc.Row(dbc.Col(html.Br())),
                     dbc.Row(dbc.Col(self.tagging_tab))
                 ]
@@ -507,7 +520,7 @@ class oligo_lcms_layout():
         )
 
         self.layout = html.Div([
-            dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App"), width='100%')),
+            dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App", id='app-main-message'), width='100%')),
             self.main_tabs
         ])
 

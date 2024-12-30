@@ -85,7 +85,7 @@ class oligo_maps_tab():
             {"field": "Purity, %", 'editable': True},
 
             {"field": "Do LCMS", 'editable': False},
-            {"field": "Done LCMS", 'editable': True},
+            {"field": "Done LCMS", 'editable': False},
             {"field": "DONE", 'editable': True}
         ]
 
@@ -116,6 +116,8 @@ class oligo_maps_tab():
                        outline=False, color="success", className="me-1"),
             dbc.Button('Sel done', id='asm2000-seldone-from-maps-db-btn',
                        outline=False, color="primary", className="me-1"),
+            dbc.Button('Put sequence', id='asm2000-put-sequence-from-maps-db-btn',
+                       outline=False, color="success", className="me-1"),
         ])
 
         self.layout = html.Div([

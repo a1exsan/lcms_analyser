@@ -347,9 +347,9 @@ def db_content_update(active_cell, load_button_click, update_button_click, save_
     if triggered_id == 'update-db-data-button' and update_button_click is not None:
         return graph_mass.figure, Patch(), data.db_admin.get_content_tab().to_dict('records')
 
-    if triggered_id == 'save-json-data-button' and save_json_data_btn is not None:
-        oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel)
-        return graph_mass.figure, Patch(), data.db_admin.get_content_tab().to_dict('records')
+    #if triggered_id == 'save-json-data-button' and save_json_data_btn is not None:
+    #    oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel)
+    #    return graph_mass.figure, Patch(), data.db_admin.get_content_tab().to_dict('records')
 
     raise PreventUpdate
 
@@ -512,6 +512,48 @@ def maps_tab_update(map_data, map_list_data, map_sel_data, map_list_sel_data,sho
     if triggered_id == 'asm2000-inprogress-maps-db-btn' and inprogress_btn is not None:
         map_list = oligo_maps.show_map_list_in_progress()
         return map_data, map_list
+
+    raise PreventUpdate
+
+@callback(
+    Output(component_id='tagging_table', component_property='data', allow_duplicate=True),
+    Output(component_id='Scatter-mass-data', component_property='figure', allow_duplicate=True),
+    Output(component_id='oligo-sequence', component_property='value', allow_duplicate=True),
+    Output(component_id='sequence-tag', component_property='value', allow_duplicate=True),
+    Output(component_id='selected-tag', component_property='value', allow_duplicate=True),
+    Output(component_id='save-lcms-data-status', component_property='children', allow_duplicate=True),
+    Output(component_id='asm2000-map-tab', component_property='rowData', allow_duplicate=True),
+    Output(component_id='app-main-message', component_property='children', allow_duplicate=True),
+
+    Input(component_id='app-main-message', component_property='children'),
+    Input(component_id='tagging_table', component_property='data'),
+    Input(component_id='Scatter-mass-data', component_property='figure'),
+    Input(component_id='oligo-sequence', component_property='value'),
+    Input(component_id='sequence-tag', component_property='value'),
+    Input(component_id='selected-tag', component_property='value'),
+    Input(component_id='save-lcms-data-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-map-tab', component_property='selectedRows'),
+    Input(component_id='save-lcms-data-status', component_property='children'),
+    Input(component_id='asm2000-map-tab', component_property='rowData'),
+    Input(component_id='asm2000-put-sequence-from-maps-db-btn', component_property='n_clicks'),
+    prevent_initial_call=True
+)
+def update_lcms_data(main_app_msg, tag_table, mass_figure, oligo_seq, sequence_tag, tag_name,
+                     save_lcms_data_btn, map_tab_sel, status_save_data, map_tab_data, put_sequence_btn):
+
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'save-lcms-data-btn' and save_lcms_data_btn is not None:
+        status, map_out_data = oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel, map_tab_data)
+        if status.status_code == 200:
+            oligo_maps.save_map(map_out_data)
+        return tag_table, mass_figure, oligo_seq, sequence_tag, tag_name, status.text, map_out_data, main_app_msg
+
+    if triggered_id == 'asm2000-put-sequence-from-maps-db-btn' and put_sequence_btn is not None:
+        sequence = map_tab_sel[0]['Sequence']
+        main_msg = 'LCMS analysis App'
+        main_msg += f" (sample position: {map_tab_sel[0]['Position']}; synth: {map_tab_sel[0]['Synt number']})"
+        return tag_table, mass_figure, sequence, sequence, 'main', status_save_data, map_tab_data, main_msg
 
     raise PreventUpdate
 

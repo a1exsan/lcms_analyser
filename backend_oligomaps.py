@@ -82,7 +82,8 @@ class oligomaps_local_db():
         df = pd.DataFrame(maps)
         return df[df['in progress'] == True].to_dict('records')
 
-    def send_lcms_data(self, json_data, selrows):
+    def send_lcms_data(self, json_data, selrows, maprows):
+        df = pd.DataFrame(maprows)
         if self.oligo_map_id > -1 and len(selrows) > 0:
             self.oligo_id = selrows[0]['Order id']
             self.oligo_pos = selrows[0]['Position']
@@ -94,6 +95,10 @@ class oligomaps_local_db():
             file_name = f'{self.oligo_map_id}_{self.oligo_id}_{self.oligo_pos}'
             url = f'{self.api_db_url}/post_lcms_json_data/{file_name}'
             ret = requests.post(url, json=json.dumps(json_data, cls=NumpyEncoder))
-            return ret
 
-        return 404
+            if ret.status_code == 200:
+                df.loc[df['Position'] == self.oligo_pos, 'Done LCMS'] = True
+
+            return ret, df.to_dict('records')
+
+        return '', df.to_dict('records')
