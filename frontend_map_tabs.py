@@ -56,9 +56,25 @@ class oligo_maps_tab():
                 'Dens, oe/ml': [0.],
                 'Vol, ml': [0.3],
                 'Purity, %': [50.],
+
                 'Do LCMS': [True],
                 'Done LCMS': [False],
+                'Do synth': [True],
+                'Done synth': [False],
+                'Do cart': [True],
+                'Done cart': [False],
+                'Do hplc': [True],
+                'Done hplc': [False],
+                'Do paag': [True],
+                'Done paag': [False],
+                'Do click': [True],
+                'Done click': [False],
+                'Do sed': [True],
+                'Done sed': [False],
+                'Do subl': [True],
+                'Done subl': [False],
                 'DONE': [False],
+                'Wasted': [False],
             }
         )
 
@@ -85,8 +101,23 @@ class oligo_maps_tab():
             {"field": "Purity, %", 'editable': True},
 
             {"field": "Do LCMS", 'editable': False},
-            {"field": "Done LCMS", 'editable': False},
-            {"field": "DONE", 'editable': True}
+            {"field": "Done LCMS", 'editable': True},
+            {"field": "Do synth", 'editable': False},
+            {"field": "Done synth", 'editable': True},
+            {"field": "Do cart", 'editable': False},
+            {"field": "Done cart", 'editable': True},
+            {"field": "Do hplc", 'editable': False},
+            {"field": "Done hplc", 'editable': True},
+            {"field": "Do paag", 'editable': False},
+            {"field": "Done paag", 'editable': True},
+            {"field": "Do sed", 'editable': False},
+            {"field": "Done sed", 'editable': True},
+            {"field": "Do click", 'editable': False},
+            {"field": "Done click", 'editable': True},
+            {"field": "Do subl", 'editable': False},
+            {"field": "Done subl", 'editable': True},
+            {"field": "DONE", 'editable': False},
+            {"field": "Wasted", 'editable': True}
         ]
 
 
@@ -108,24 +139,60 @@ class oligo_maps_tab():
         self.buttons = dbc.Col([
             dbc.Button('Show content', id='asm2000-show-maps-db-btn',
                        outline=False, color="primary", className="me-1"),
-            dbc.Button('Show in PROGRESS', id='asm2000-inprogress-maps-db-btn',
+            dbc.Button('Show actual', id='asm2000-inprogress-maps-db-btn',
                        outline=False, color="success", className="me-1"),
             dbc.Button('Load map', id='asm2000-load-from-maps-db-btn',
                        outline=False, color="primary", className="me-1"),
             dbc.Button('Save map', id='asm2000-save-from-maps-db-btn',
                        outline=False, color="success", className="me-1"),
-            dbc.Button('Sel done', id='asm2000-seldone-from-maps-db-btn',
-                       outline=False, color="primary", className="me-1"),
+            #dbc.Button('Sel done', id='asm2000-seldone-from-maps-db-btn',
+            #           outline=False, color="primary", className="me-1"),
             dbc.Button('Put sequence', id='asm2000-put-sequence-from-maps-db-btn',
                        outline=False, color="success", className="me-1"),
             dbc.Button('Load LCMS data', id='asm2000-load-lcms-data-from-maps-db-btn',
                        outline=False, color="primary", className="me-1"),
+            dcc.Input(placeholder='Enter volume, ml', id='asm2000-set-volume-input', type="text",
+                      size='25', debounce=True),
+            dbc.Button('Set volume', id='asm2000-set-volume-btn',
+                       outline=False, color="info", className="me-1"),
+        ])
+
+        self.flags_buttons = dbc.Col([
+            dbc.Button("Done lcms", outline=True, color="warning",
+                       id='set-done-lcms-btn', className="me-1", size='lg'),
+            dbc.Button("Done synth", outline=True, color="warning",
+                       id='set-done-synth-btn', className="me-1", size='lg'),
+            dbc.Button("Done cart", outline=True, color="warning",
+                       id='set-done-cart-btn', className="me-1", size='lg'),
+            dbc.Button("Done hplc", outline=True, color="warning",
+                       id='set-done-hplc-btn', className="me-1", size='lg'),
+            dbc.Button("Done paag", outline=True, color="warning",
+                       id='set-done-paag-btn', className="me-1", size='lg'),
+            dbc.Button("Done sed", outline=True, color="warning",
+                       id='set-done-sed-btn', className="me-1", size='lg'),
+            dbc.Button("Done click", outline=True, color="warning",
+                       id='set-done-click-btn', className="me-1", size='lg'),
+            dbc.Button("Done subl", outline=True, color="warning",
+                       id='set-done-subl-btn', className="me-1", size='lg'),
         ])
 
         self.layout = html.Div([
             dbc.Row([
                 self.map_tab_,
                 self.buttons,
+                dbc.Row([
+                    dbc.Col(
+                        dbc.Button("update ologomap status", outline=True, color="primary",
+                                   id='asm2000-update-oligomap-status-btn', className="me-1", size='lg')
+                    )
+                ]),
+                dbc.Row(self.flags_buttons),
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Button("Wasted selection", outline=False, color="danger",
+                                   id='asm2000-wasted-status-btn', className="me-1", size='sm')
+                    ])
+                ]),
                 self.map_db_tab
             ])
         ])

@@ -77,10 +77,42 @@ class oligomaps_local_db():
             df.loc[df['#'] == r['#'], 'DONE'] = True
         return df.to_dict('records')
 
+    def get_oligomaps_data(self):
+        url = f'{self.api_db_url}/get_all_tab_data/{self.maps_db_name}/main_map'
+        ret = requests.get(url)
+        if ret.status_code == 200:
+            out = []
+            for r in ret.json():
+                d = {}
+                d['#'] = r[0]
+                d['Map name'] = r[2]
+                d['Synth number'] = r[3]
+                d['Date'] = r[1]
+                d['in progress'] = self.map_in_progress(r[4])
+                d['map data'] = pd.DataFrame(json.loads(r[4]))
+                out.append(d)
+            return out
+        else:
+            return []
+
     def show_map_list_in_progress(self):
-        maps = self.get_oligomaps()
-        df = pd.DataFrame(maps)
-        return df[df['in progress'] == True].to_dict('records')
+        total_maps = self.get_oligomaps_data()
+        if len(total_maps) > 0:
+            out = []
+            for row in total_maps:
+                df = row['map data']
+                if df.shape[0] > 0:
+                    if df[(df['DONE'] == True) | (df['Wasted'] == True)].shape[0] != df.shape[0]:
+                        d = {}
+                        d['#'] = row['#']
+                        d['Map name'] = row['Map name']
+                        d['Synth number'] = row['Synth number']
+                        d['Date'] = row['Date']
+                        d['in progress'] = row['in progress']
+                        out.append(d)
+            return out
+        else:
+            return []
 
     def send_lcms_data(self, json_data, selrows, maprows):
         df = pd.DataFrame(maprows)
@@ -117,17 +149,103 @@ class oligomaps_local_db():
 
             return ret
 
-
     def add_data_to_purity_tab(self, mass_tags, row_index, rowdata):
         df = pd.DataFrame(rowdata)
         if self.oligo_id > -1:
             df.loc[df['Position'] == self.oligo_pos, 'Purity, %'] = round(float(mass_tags[row_index]['area%']), 0)
         return df.to_dict('records')
 
+    def update_map_flags(self, type_flags, rowData, selrowData):
+
+        if len(selrowData) == 0:
+            index_list = list(pd.DataFrame(rowData)['#'])
+        else:
+            index_list = list(pd.DataFrame(selrowData)['#'])
+
+        out = []
+        for row in rowData:
+                d = row.copy()
+                if row['#'] in index_list:
+                    if type_flags in list(row.keys()):
+                        d[type_flags] = not d[type_flags]
+                    else:
+                        d[type_flags] = True
+                out.append(d)
+        return out
+
+    def get_order_status(self, row):
+        state_list = ['synth', 'sed', 'click', 'cart', 'hplc', 'paag', 'LCMS', 'subl']
+        flag_list = []
+        for state in state_list:
+            flag_list.append(row[f'Do {state}'] == row[f'Done {state}'])
+        status = 'synthesis'
+        for i in range(8):
+            if not flag_list[i]:
+                if i < 3:
+                    status = 'synthesis'
+                elif i > 2 and i < 6:
+                    status = 'purification'
+                elif i == 7:
+                    status = 'formulation'
+                return status
+            else:
+                if i == 7:
+                    status = 'finished'
+                    return status
+        return status
 
 
+    def update_oligomap_status(self, rowData):
+        if self.oligo_map_id > -1:
+            out = []
+            for row in rowData:
+                out.append(row)
+                #if not out[-1]['DONE']:
+                out[-1]['Status'] = self.get_order_status(row)
+                if out[-1]['Status'] == 'finished':
+                    out[-1]['DONE'] = True
+                else:
+                    out[-1]['DONE'] = False
 
+            url = f"{self.api_db_url}/update_data/{self.maps_db_name}/main_map/{self.oligo_map_id}"
+            r = requests.put(url,
+                              json=json.dumps({
+                                  'name_list': ['map_tab'],
+                                  'value_list': [
+                                      json.dumps(out)
+                                  ]
+                              })
+                             )
+            print(f'update status {self.oligo_map_id}: {r.status_code}')
+            return out
+        else:
+            return rowData
 
+    def update_order_status(self, rowData):
+        if len(rowData) > 0:
+            for row in rowData:
+                order_id = row['Order id']
+                order_date = row['Date']
+                order_status = row['Status']
 
+                url = f"{self.api_db_url}/update_data/{self.db_name}/orders_tab/{order_id}"
+                r = requests.put(url,
+                    json=json.dumps({
+                        'name_list': ['output_date', 'status'],
+                        'value_list': [order_date, order_status]
+                    })
+                )
 
+    def setup_map_volumes(self, volume_input, map_rowdata, sel_map_rowdata):
+        if len(sel_map_rowdata) == 0:
+            index_list = list(pd.DataFrame(map_rowdata)['#'])
+        else:
+            index_list = list(pd.DataFrame(sel_map_rowdata)['#'])
 
+        out = []
+        for row in map_rowdata:
+                d = row.copy()
+                if row['#'] in index_list:
+                    d['Vol, ml'] = float(volume_input)
+                out.append(d)
+        return out

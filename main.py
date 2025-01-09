@@ -483,12 +483,12 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     Input(component_id='asm2000-show-maps-db-btn', component_property='n_clicks'),
     Input(component_id='asm2000-load-from-maps-db-btn', component_property='n_clicks'),
     Input(component_id='asm2000-save-from-maps-db-btn', component_property='n_clicks'),
-    Input(component_id='asm2000-seldone-from-maps-db-btn', component_property='n_clicks'),
+    #Input(component_id='asm2000-seldone-from-maps-db-btn', component_property='n_clicks'),
     Input(component_id='asm2000-inprogress-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
 def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_list_sel_data, show_list_btn, load_map_btn,
-                    save_map_btn, seldone_btn, inprogress_btn):
+                    save_map_btn, inprogress_btn):
     triggered_id = ctx.triggered_id
 
     if triggered_id == 'asm2000-show-maps-db-btn' and show_list_btn is not None:
@@ -509,9 +509,9 @@ def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_lis
         status = oligo_maps.save_map(map_data)
         return map_data, map_list_data, main_app_msg
 
-    if triggered_id == 'asm2000-seldone-from-maps-db-btn' and seldone_btn is not None:
-        map = oligo_maps.sel_done(map_data, map_sel_data)
-        return map, map_list_data, main_app_msg
+    #if triggered_id == 'asm2000-seldone-from-maps-db-btn' and seldone_btn is not None:
+    #    map = oligo_maps.sel_done(map_data, map_sel_data)
+    #    return map, map_list_data, main_app_msg
 
     if triggered_id == 'asm2000-inprogress-maps-db-btn' and inprogress_btn is not None:
         map_list = oligo_maps.show_map_list_in_progress()
@@ -591,6 +591,77 @@ def update_lcms_data(main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq,
         oligo_maps.save_map(map_out_data)
         return (tag_table, mz_figure, mass_figure, oligo_seq, sequence_tag, tag_name, status_save_data, map_out_data,
                 main_app_msg)
+
+    raise PreventUpdate
+
+@callback(
+    Output(component_id='asm2000-map-tab', component_property='rowData', allow_duplicate=True),
+
+    Input(component_id='asm2000-map-tab', component_property='rowData'),
+    Input(component_id='asm2000-map-tab', component_property='selectedRows'),
+    Input(component_id='set-done-lcms-btn', component_property='n_clicks'),
+    Input(component_id='set-done-synth-btn', component_property='n_clicks'),
+    Input(component_id='set-done-cart-btn', component_property='n_clicks'),
+    Input(component_id='set-done-hplc-btn', component_property='n_clicks'),
+    Input(component_id='set-done-paag-btn', component_property='n_clicks'),
+    Input(component_id='set-done-sed-btn', component_property='n_clicks'),
+    Input(component_id='set-done-click-btn', component_property='n_clicks'),
+    Input(component_id='set-done-subl-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-wasted-status-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-update-oligomap-status-btn', component_property='n_clicks'),
+    Input(component_id='asm2000-set-volume-input', component_property='value'),
+    Input(component_id='asm2000-set-volume-btn', component_property='n_clicks'),
+    prevent_initial_call=True
+)
+def update_flags_tab(map_rowdata, sel_map_rowdata,
+                     done_lcms_btn, done_synth_btn, done_cart_btn, done_hplc_btn, done_paag_btn, done_sed_btn,
+                     done_click_btn, done_subl_btn, wasted_sel_btn, update_omap_status_btn,
+                     volume_input, set_volume_btn):
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'set-done-lcms-btn' and done_lcms_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done LCMS', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-synth-btn' and done_synth_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done synth', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-cart-btn' and done_cart_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done cart', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-hplc-btn' and done_hplc_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done hplc', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-paag-btn' and done_paag_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done paag', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-sed-btn' and done_sed_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done sed', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-click-btn' and done_click_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done click', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'set-done-subl-btn' and done_subl_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Done subl', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'asm2000-wasted-status-btn' and wasted_sel_btn is not None:
+        out_map_data = oligo_maps.update_map_flags('Wasted', map_rowdata, sel_map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'asm2000-update-oligomap-status-btn' and update_omap_status_btn is not None:
+        out_map_data = oligo_maps.update_oligomap_status(map_rowdata)
+        return out_map_data
+
+    if triggered_id == 'asm2000-set-volume-btn' and set_volume_btn is not None:
+        out_map_data = oligo_maps.setup_map_volumes(volume_input, map_rowdata, sel_map_rowdata)
+        return out_map_data
 
     raise PreventUpdate
 
