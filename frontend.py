@@ -525,6 +525,8 @@ class oligo_lcms_layout():
 
         self.layout = html.Div([
             dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App", id='app-main-message'), width='100%')),
+            dbc.Row(dbc.Col([
+                dbc.Input(placeholder='Enter pincode', type='text', id='pincode-input')])),
             self.main_tabs
         ])
 

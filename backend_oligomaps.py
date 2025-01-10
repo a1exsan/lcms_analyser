@@ -25,6 +25,10 @@ class oligomaps_local_db():
         self.api_db_url = f'http://{self.db_IP}:{self.db_port}'
         self.oligo_map_id = -1
         self.oligo_id = -1
+        self.pincode = ''
+
+    def headers(self):
+        return {'Authorization': f'Pincode {self.pincode}'}
 
     def map_in_progress(self, mapdata):
         map = json.loads(mapdata)
@@ -37,7 +41,7 @@ class oligomaps_local_db():
 
     def get_oligomaps(self):
         url = f'{self.api_db_url}/get_all_tab_data/{self.maps_db_name}/main_map'
-        ret = requests.get(url)
+        ret = requests.get(url, headers=self.headers())
         if ret.status_code == 200:
             out = []
             for r in ret.json():
@@ -55,7 +59,7 @@ class oligomaps_local_db():
     def load_oligomap(self, seldata):
         if len(seldata) > 0:
             url = f"{self.api_db_url}/get_keys_data/{self.maps_db_name}/main_map/id/{seldata[0]['#']}"
-            ret = requests.get(url)
+            ret = requests.get(url, headers=self.headers())
             if ret.status_code == 200:
                 self.oligo_map_id = seldata[0]['#']
                 return json.loads(ret.json()[0][4])
@@ -67,7 +71,7 @@ class oligomaps_local_db():
         if self.oligo_map_id > -1:
             url = f'{self.api_db_url}/update_data/{self.maps_db_name}/main_map/{self.oligo_map_id}'
             ret = requests.put(url, json=json.dumps({'name_list':['map_tab'],
-                                                     'value_list':[json.dumps(map_data)]}))
+                                                     'value_list':[json.dumps(map_data)]}), headers=self.headers())
             return ret.status_code
         return 404
 
@@ -79,7 +83,7 @@ class oligomaps_local_db():
 
     def get_oligomaps_data(self):
         url = f'{self.api_db_url}/get_all_tab_data/{self.maps_db_name}/main_map'
-        ret = requests.get(url)
+        ret = requests.get(url, headers=self.headers())
         if ret.status_code == 200:
             out = []
             for r in ret.json():
@@ -128,7 +132,7 @@ class oligomaps_local_db():
             url = f'{self.api_db_url}/post_lcms_json_data/{file_name}'
             #ret = requests.post(url, json=json.dumps(json_data, cls=NumpyEncoder))
             #print(json_data)
-            ret = requests.post(url, json=json.dumps(json_data))
+            ret = requests.post(url, json=json.dumps(json_data), headers=self.headers())
 
             if ret.status_code == 200:
                 df.loc[df['Position'] == self.oligo_pos, 'Done LCMS'] = True
@@ -145,7 +149,7 @@ class oligomaps_local_db():
 
             file_name = f'{self.oligo_map_id}_{self.oligo_id}_{self.oligo_pos}'
             url = f'{self.api_db_url}/get_lcms_json_data/{file_name}'
-            ret = requests.get(url)
+            ret = requests.get(url, headers=self.headers())
 
             return ret
 
@@ -215,7 +219,7 @@ class oligomaps_local_db():
                                       json.dumps(out)
                                   ]
                               })
-                             )
+                             , headers=self.headers())
             print(f'update status {self.oligo_map_id}: {r.status_code}')
             return out
         else:
@@ -234,7 +238,7 @@ class oligomaps_local_db():
                         'name_list': ['output_date', 'status'],
                         'value_list': [order_date, order_status]
                     })
-                )
+                , headers=self.headers())
 
     def setup_map_volumes(self, volume_input, map_rowdata, sel_map_rowdata):
         if len(sel_map_rowdata) == 0:

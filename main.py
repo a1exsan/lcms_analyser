@@ -10,7 +10,7 @@ import json
 
 from backend_oligomaps import NumpyEncoder
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.251', db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
 
 oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
 
@@ -47,6 +47,7 @@ app.layout = frontend_obj.layout
     Output(component_id='show-bkg-polish-repeats', component_property='children'),
     Output(component_id='Scatter-mass-data', component_property='figure', allow_duplicate=True),
 
+    Input(component_id='pincode-input', component_property='value'),
     Input(component_id='Scatter-mzdata', component_property='selectedData'),
     Input('retention-time-interval', 'value'),
     Input('background-treshold', 'value'),
@@ -63,7 +64,7 @@ app.layout = frontend_obj.layout
     Input(component_id='control-deconv-mode', component_property='value'),
     prevent_initial_call=True
 )
-def update_output(selectedData,
+def update_output(pincode, selectedData,
                   retention_interval,
                   bkg_treshold,
                   neighbor_treshold,
@@ -186,11 +187,12 @@ def update_output(selectedData,
     Output('low-intens-treshold', 'value'),
     Output('bkg-polish-repeats', 'value'),
 
+    Input(component_id='pincode-input', component_property='value'),
     Input('upload-data', 'filename'),
     Input('upload-data', 'contents'),
     prevent_initial_call=True)
 
-def upload_data_from_file(file_name, file_content):
+def upload_data_from_file(pincode, file_name, file_content):
     triggered_id = ctx.triggered_id
     if triggered_id == 'upload-data':
         if file_content is not None:
@@ -475,6 +477,7 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     Output(component_id='asm2000-map-list-tab', component_property='rowData'),
     Output(component_id='app-main-message', component_property='children', allow_duplicate=True),
 
+    Input(component_id='pincode-input', component_property='value'),
     Input(component_id='app-main-message', component_property='children'),
     Input(component_id='asm2000-map-tab', component_property='rowData'),
     Input(component_id='asm2000-map-list-tab', component_property='rowData'),
@@ -487,9 +490,12 @@ def mz_deconvolution_update(low_intens_treshold, sel_points, selected_click, all
     Input(component_id='asm2000-inprogress-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_list_sel_data, show_list_btn, load_map_btn,
+def maps_tab_update(pincode,
+                    main_app_msg, map_data, map_list_data, map_sel_data, map_list_sel_data, show_list_btn, load_map_btn,
                     save_map_btn, inprogress_btn):
     triggered_id = ctx.triggered_id
+
+    oligo_maps.pincode = pincode
 
     if triggered_id == 'asm2000-show-maps-db-btn' and show_list_btn is not None:
         maps = oligo_maps.get_oligomaps()
@@ -530,6 +536,7 @@ def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_lis
     Output(component_id='asm2000-map-tab', component_property='rowData', allow_duplicate=True),
     Output(component_id='app-main-message', component_property='children', allow_duplicate=True),
 
+    Input(component_id='pincode-input', component_property='value'),
     Input(component_id='app-main-message', component_property='children'),
     Input(component_id='tagging_table', component_property='data'),
     Input(component_id='Scatter-mass-data', component_property='figure'),
@@ -547,11 +554,13 @@ def maps_tab_update(main_app_msg, map_data, map_list_data, map_sel_data, map_lis
     Input(component_id='asm2000-load-lcms-data-from-maps-db-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def update_lcms_data(main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq, sequence_tag, tag_name,
+def update_lcms_data(pincode, main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq, sequence_tag, tag_name,
                      save_lcms_data_btn, add_to_purity, map_tab_sel, map_list_tab_sel, status_save_data, map_tab_data,
                      put_sequence_btn, load_lcms_data_btn):
 
     triggered_id = ctx.triggered_id
+
+    oligo_maps.pincode = pincode
 
     if triggered_id == 'save-lcms-data-btn' and save_lcms_data_btn is not None:
         status, map_out_data = oligo_maps.send_lcms_data(data.to_dict(), map_tab_sel, map_tab_data)
@@ -597,6 +606,7 @@ def update_lcms_data(main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq,
 @callback(
     Output(component_id='asm2000-map-tab', component_property='rowData', allow_duplicate=True),
 
+    Input(component_id='pincode-input', component_property='value'),
     Input(component_id='asm2000-map-tab', component_property='rowData'),
     Input(component_id='asm2000-map-tab', component_property='selectedRows'),
     Input(component_id='set-done-lcms-btn', component_property='n_clicks'),
@@ -613,11 +623,13 @@ def update_lcms_data(main_app_msg, tag_table, mass_figure, mz_figure, oligo_seq,
     Input(component_id='asm2000-set-volume-btn', component_property='n_clicks'),
     prevent_initial_call=True
 )
-def update_flags_tab(map_rowdata, sel_map_rowdata,
+def update_flags_tab(pincode, map_rowdata, sel_map_rowdata,
                      done_lcms_btn, done_synth_btn, done_cart_btn, done_hplc_btn, done_paag_btn, done_sed_btn,
                      done_click_btn, done_subl_btn, wasted_sel_btn, update_omap_status_btn,
                      volume_input, set_volume_btn):
     triggered_id = ctx.triggered_id
+
+    oligo_maps.pincode = pincode
 
     if triggered_id == 'set-done-lcms-btn' and done_lcms_btn is not None:
         out_map_data = oligo_maps.update_map_flags('Done LCMS', map_rowdata, sel_map_rowdata)
