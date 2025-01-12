@@ -7,12 +7,15 @@ import dataEditor as de
 import frontend
 import backend_oligomaps
 import json
+import backend_stock
 
 from backend_oligomaps import NumpyEncoder
 
 #oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
+#stock_data = backend_stock.stock_manager(b_IP='192.168.17.250', db_port='8012')
 
 oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
+stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -674,6 +677,66 @@ def update_flags_tab(pincode, map_rowdata, sel_map_rowdata,
     if triggered_id == 'asm2000-set-volume-btn' and set_volume_btn is not None:
         out_map_data = oligo_maps.setup_map_volumes(volume_input, map_rowdata, sel_map_rowdata)
         return out_map_data
+
+    raise PreventUpdate
+
+@callback(
+    Output(component_id='main-stock-tab-database', component_property='rowData', allow_duplicate=True),
+    Output(component_id='input-stock-tab-database', component_property='rowData', allow_duplicate=True),
+    Output(component_id='output-stock-tab-database', component_property='rowData', allow_duplicate=True),
+    #Output(component_id='user-stock-tab-database', component_property='rowData', allow_duplicate=True),
+
+    Input(component_id='pincode-input', component_property='value'),
+
+    Input(component_id='main-stock-tab-database', component_property='rowData'),
+    Input(component_id='main-stock-tab-database', component_property='selectedRows'),
+    Input(component_id='input-stock-tab-database', component_property='rowData'),
+    Input(component_id='output-stock-tab-database', component_property='rowData'),
+    #Input(component_id='user-stock-tab-database', component_property='rowData'),
+
+    Input(component_id='show-stock-data-btn', component_property='n_clicks'),
+    Input(component_id='update-stock-data-btn', component_property='n_clicks'),
+    Input(component_id='add-row-stock-data-btn', component_property='n_clicks'),
+    Input(component_id='delete-row-stock-data-btn', component_property='n_clicks'),
+    Input(component_id='substruct_from-stock-data-btn', component_property='n_clicks'),
+    Input(component_id='add-to-stock-data-btn', component_property='n_clicks'),
+
+    prevent_initial_call=True
+)
+def update_stock_tab(pincode, stock_rowdata, sel_stock_rowdata, input_rowdata, output_rowdata,
+                     show_stock_btn, update_stock_btn, add_row_stock_btn, delete_row_stock_btn,
+                     substruct_btn, adjust_btn):
+    triggered_id = ctx.triggered_id
+
+    stock_data.pincode = pincode
+
+    if triggered_id == 'show-stock-data-btn' and show_stock_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = stock_data.show_main_tab_data()
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata #, out_users_rowdata
+
+    if triggered_id == 'update-stock-data-btn' and update_stock_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = (
+            stock_data.update_tab(stock_rowdata))
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata, out_users_rowdata
+
+    if triggered_id == 'add-row-stock-data-btn' and add_row_stock_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = stock_data.add_row()
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata#, out_users_rowdata
+
+    if triggered_id == 'delete-row-stock-data-btn' and delete_row_stock_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = (
+            stock_data.delete_rows(sel_stock_rowdata))
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata#, out_users_rowdata
+
+    if triggered_id == 'substruct_from-stock-data-btn' and substruct_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = (
+            stock_data.substruct_from_stock('', 'output_tab', stock_rowdata))
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata#, out_users_rowdata
+
+    if triggered_id == 'add-to-stock-data-btn' and adjust_btn is not None:
+        out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = (
+            stock_data.substruct_from_stock('', 'input_tab', stock_rowdata))
+        return out_stock_rowdata, out_input_rowdata, out_output_rowdata#, out_users_rowdata
 
     raise PreventUpdate
 

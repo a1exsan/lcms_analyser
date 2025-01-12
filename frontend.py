@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 
 import frontend_map_tabs
+import frontend_stock
 
 
 class oligo_lcms_layout():
@@ -515,11 +516,13 @@ class oligo_lcms_layout():
 ])
 
         self.map_tabs_obj = frontend_map_tabs.oligo_maps_tab()
+        self.stock_tables = frontend_stock.oligo_stock_database_layout()
 
         self.main_tabs = dbc.Tabs(
             [
                 dbc.Tab(self.lcms_layout, label = 'LCMS analyser'),
-                dbc.Tab(self.map_tabs_obj.layout, label = 'Maps tables')
+                dbc.Tab(self.map_tabs_obj.layout, label = 'Maps tables'),
+                dbc.Tab(self.stock_tables.layout, label = 'Stock')
         ]
         )
 
