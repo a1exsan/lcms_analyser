@@ -22,6 +22,7 @@ class oligomaps_local_db():
         self.db_IP = db_IP
         self.db_port = db_port
         self.maps_db_name = 'asm2000_map_1.db'
+        self.db_name = 'stock_oligolab_5.db'
         self.api_db_url = f'http://{self.db_IP}:{self.db_port}'
         self.oligo_map_id = -1
         self.oligo_id = -1
@@ -253,3 +254,31 @@ class oligomaps_local_db():
                     d['Vol, ml'] = float(volume_input)
                 out.append(d)
         return out
+
+    def check_pincode(self):
+            url = f"{self.api_db_url}/get_keys_data/{self.db_name}/users/pin/{self.pincode}"
+            r = requests.get(url, headers=self.headers())
+            if r.status_code == 200:
+                return True
+            else:
+                return False
+
+    def add_new_modification(self, rowData):
+        if self.check_pincode():
+            out = []
+            out.append({'code': '', 'mass': 0., 'ext_cf': 0, 'formula+': '', 'formula-': '', 'in_base': True})
+            for row in rowData:
+                out.append(row)
+            return out
+        else:
+            return rowData
+
+    def save_modification_table(self, rowData):
+        if self.check_pincode():
+            df = pd.DataFrame(rowData)
+            #df = df[df['in_base'] == True]
+            df.to_csv('external_mods.csv', index=False, sep='\t')
+            df = pd.read_csv('external_mods.csv', sep='\t')
+            return df.to_dict('records')
+        else:
+            return rowData

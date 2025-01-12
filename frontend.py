@@ -4,6 +4,7 @@ import pandas as pd
 
 import frontend_map_tabs
 import frontend_stock
+import frontend_edit_external_mods
 
 
 class oligo_lcms_layout():
@@ -517,19 +518,23 @@ class oligo_lcms_layout():
 
         self.map_tabs_obj = frontend_map_tabs.oligo_maps_tab()
         self.stock_tables = frontend_stock.oligo_stock_database_layout()
+        self.mods_editor = frontend_edit_external_mods.modif_editor_layout()
 
         self.main_tabs = dbc.Tabs(
             [
                 dbc.Tab(self.lcms_layout, label = 'LCMS analyser'),
+                dbc.Tab(self.mods_editor.layout, label = 'Modifications'),
                 dbc.Tab(self.map_tabs_obj.layout, label = 'Maps tables'),
                 dbc.Tab(self.stock_tables.layout, label = 'Stock')
         ]
         )
 
         self.layout = html.Div([
-            dbc.Row(dbc.Col(dbc.Alert("LCMS analysis App", id='app-main-message'), width='100%')),
+            dbc.Row(dbc.Col(dbc.Alert("Oligolab data manager", id='app-main-message'), width='100%')),
             dbc.Row(dbc.Col([
-                dbc.Input(placeholder='Enter pincode', type='text', id='pincode-input')])),
+                dbc.Input(placeholder='Enter pincode', type='text', id='pincode-input',
+                                        size='25',  debounce=True),
+            ])),
             self.main_tabs
         ])
 

@@ -37,6 +37,7 @@ graph_mass = dv.lcms2Dview(data.get_init_x(),
 frontend_obj = frontend.oligo_lcms_layout(graph_mz, graph_mass, data.db_admin.get_content_tab())
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.title= 'OligoLab'
 
 app.layout = frontend_obj.layout
 
@@ -737,6 +738,31 @@ def update_stock_tab(pincode, stock_rowdata, sel_stock_rowdata, input_rowdata, o
         out_stock_rowdata, out_output_rowdata, out_input_rowdata, out_users_rowdata = (
             stock_data.substruct_from_stock('', 'input_tab', stock_rowdata))
         return out_stock_rowdata, out_input_rowdata, out_output_rowdata#, out_users_rowdata
+
+    raise PreventUpdate
+
+@callback(
+    Output(component_id='external_mods_table', component_property='rowData', allow_duplicate=True),
+
+    Input(component_id='pincode-input', component_property='value'),
+    Input(component_id='external_mods_table', component_property='rowData'),
+    Input(component_id='adjust-new-modif-btn', component_property='n_clicks'),
+    Input(component_id='save-modif-btn', component_property='n_clicks'),
+
+    prevent_initial_call=True
+)
+def update_stock_tab(pincode, mods_rowdata, add_new_btn, save_btn):
+    triggered_id = ctx.triggered_id
+
+    oligo_maps.pincode = pincode
+
+    if triggered_id == 'adjust-new-modif-btn' and add_new_btn is not None:
+        out_mods = oligo_maps.add_new_modification(mods_rowdata)
+        return out_mods
+
+    if triggered_id == 'save-modif-btn' and save_btn is not None:
+        out_mods = oligo_maps.save_modification_table(mods_rowdata)
+        return out_mods
 
     raise PreventUpdate
 
