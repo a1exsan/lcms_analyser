@@ -155,6 +155,8 @@ class oligo_maps_tab():
                       size='25', debounce=True),
             dbc.Button('Set volume', id='asm2000-set-volume-btn',
                        outline=False, color="info", className="me-1"),
+            dbc.Button('Print passport', id='asm2000-print_pass-btn',
+                       outline=False, color="success", className="me-1"),
         ])
 
         self.flags_buttons = dbc.Col([

@@ -11,11 +11,11 @@ import backend_stock
 
 from backend_oligomaps import NumpyEncoder
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
-#stock_data = backend_stock.stock_manager(b_IP='192.168.17.250', db_port='8012')
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
+stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
 
-oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
-stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
+#stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -763,6 +763,30 @@ def update_stock_tab(pincode, mods_rowdata, add_new_btn, save_btn):
     if triggered_id == 'save-modif-btn' and save_btn is not None:
         out_mods = oligo_maps.save_modification_table(mods_rowdata)
         return out_mods
+
+    raise PreventUpdate
+
+@callback(
+    Output(component_id='passport-view-tab', component_property='data', allow_duplicate=True),
+
+    Input(component_id='pincode-input', component_property='value'),
+    Input(component_id='asm2000-print_pass-btn', component_property='n_clicks'),
+    Input(component_id='passport-view-tab', component_property='data'),
+    Input(component_id='asm2000-map-tab', component_property='rowData'),
+    #Input(component_id='asm2000-map-name', component_property='value'),
+    prevent_initial_call=True
+)
+def show_print_pass_tab(pincode, print_pass_btn, pass_data, rowdata):
+    triggered_id = ctx.triggered_id
+
+    oligo_maps.pincode = pincode
+
+    if triggered_id == 'asm2000-print_pass-btn' and print_pass_btn is not None:
+        if oligo_maps.check_pincode():
+            data_tab = oligo_maps.print_pass(rowdata)
+        else:
+            data_tab = pass_data
+        return data_tab
 
     raise PreventUpdate
 

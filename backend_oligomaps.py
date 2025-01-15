@@ -5,6 +5,8 @@ import json
 import pandas as pd
 import numpy as np
 
+from oligoMass import molmassOligo as mmo
+
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
     def default(self, obj):
@@ -282,3 +284,34 @@ class oligomaps_local_db():
             return df.to_dict('records')
         else:
             return rowData
+
+
+    def  print_pass(self, rowData):
+        out_tab = []
+        index_ = 1
+        for row in rowData:
+            o = mmo.oligoNASequence(row['Sequence'])
+            d = {}
+            d['#'] = index_
+            index_ += 1
+            d['Position'] = row['Position']
+            d['Name'] = row['Name'] + f"  ({row['Position']})"
+            d['Sequence'] = row['Sequence']
+            d['Amount,_oe'] = int(round(row['Dens, oe/ml'] * row['Vol, ml'], 0))
+            if o.getExtinction() > 0:
+                d['Amount,_nmol'] = int(round(d['Amount,_oe'] * 1e6 / o.getExtinction(), 0))
+            else:
+                d['Amount,_nmol'] = 0.
+            d['Desolving'] = int(d['Amount,_nmol'] * 10)
+
+            d['Purification'] = row['Purif type']
+            d['order_ID'] = row['Order id']
+            try:
+                d['Mass,_Da'] = round(o.getAvgMass(), 2)
+            except:
+                d['Mass,_Da'] = 'unknown modiff'
+            d['Extinction'] = o.getExtinction()
+
+            out_tab.append(d)
+
+        return out_tab
