@@ -1,5 +1,6 @@
 code	mass	ext_cf	formula+	formula-	in_base
-Alk_dT	500.0	0			True
+R110_dT	0.0	0	C33H29N7O5		True
+Alk_dT	0.0	0	C9ONH9		True
 5Phos	80.0	0			True
 +m	0.0	0	C2H2O		True
 LNA	0.0	0	CO		True

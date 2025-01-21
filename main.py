@@ -11,11 +11,11 @@ import backend_stock
 
 from backend_oligomaps import NumpyEncoder
 
-oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
-stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
+#stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
-#stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
+stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -174,7 +174,7 @@ def update_output(pincode, selectedData,
                     data.selected_mz_points.append({'rt': point['x'], 'mass': point['y'],
                                                       'index': point['pointIndex']
                                                     })
-                print(data.selected_mz_points)
+                #print(data.selected_mz_points)
                 return (Patch(), show_rt_interval, show_bkg_treshold, show_neighbor_treshold,
                         show_low_intens_treshold, show_bkg_polish_repeats, graph_mass.figure)
 
@@ -787,6 +787,53 @@ def show_print_pass_tab(pincode, print_pass_btn, pass_data, rowdata):
         else:
             data_tab = pass_data
         return data_tab
+
+    raise PreventUpdate
+
+
+@callback(
+    Output(component_id='lcms-adducts-tab', component_property='rowData', allow_duplicate=True),
+    Output(component_id='total-adduct-mz-area', component_property='children', allow_duplicate=True),
+    Output(component_id='normal-purity-input', component_property='value', allow_duplicate=True),
+
+    Input(component_id='lcms-adducts-tab', component_property='rowData'),
+    Input(component_id='lcms-adducts-tab', component_property='selectedRows'),
+    Input(component_id='Scatter-mzdata', component_property='selectedData'),
+    Input(component_id='total-adduct-mz-area', component_property='children'),
+    Input(component_id='add-adduct-area-btn', component_property='n_clicks'),
+    Input(component_id='update-mass-tab-btn', component_property='n_clicks'),
+    Input(component_id='del-adduct-area-btn', component_property='n_clicks'),
+    Input(component_id='normalization-tab-btn', component_property='n_clicks'),
+    Input(component_id='normal-purity-input', component_property='value'),
+    Input(component_id='save-to-csv-tab-btn', component_property='n_clicks'),
+    prevent_initial_call=True
+)
+def lcms_mz_adducts_update(lcms_adducts_tab, sel_rowdata, selected_mz_data, total_purity,
+                           add_adduct_btn,
+                           update_mass_btn,
+                           del_adduct_btn, normal_btn, norm_coeff, save_report_csv_btn):
+    triggered_id = ctx.triggered_id
+
+    if triggered_id == 'add-adduct-area-btn' and add_adduct_btn is not None:
+        adduct_tab = data.add_mz_adduct_to_tab(lcms_adducts_tab, selected_mz_data)
+        return adduct_tab, total_purity, norm_coeff
+
+    if triggered_id == 'update-mass-tab-btn' and update_mass_btn is not None:
+        adduct_tab = data.update_mass_tab_(lcms_adducts_tab, sel_rowdata)
+        purity = data.get_total_adduct_area_purity(lcms_adducts_tab)
+        return adduct_tab, purity, norm_coeff
+
+    if triggered_id == 'del-adduct-area-btn' and del_adduct_btn is not None:
+        adduct_tab = data.delete_lcms_adduct_tag(lcms_adducts_tab, sel_rowdata)
+        return adduct_tab, total_purity, norm_coeff
+
+    if triggered_id == 'normalization-tab-btn' and normal_btn is not None:
+        adduct_tab = data.normalization_adduct_purities(lcms_adducts_tab, norm_coeff)
+        return adduct_tab, total_purity, norm_coeff
+
+    if triggered_id == 'save-to-csv-tab-btn' and save_report_csv_btn is not None:
+        data.save_adduct_report_to_csv('adduct_report.csv', lcms_adducts_tab)
+        return lcms_adducts_tab, total_purity, norm_coeff
 
     raise PreventUpdate
 

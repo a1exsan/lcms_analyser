@@ -516,6 +516,47 @@ class mzdataBuilder():
                 rect['mz_max'] = df['y'].max()
         return rect
 
+    def get_selected_area(self, rect_points):
+        rect = self.get_rect_borders(rect_points)
+        df = pd.DataFrame({'mz': self.get_y(), 'rt': self.get_x(), 'intens': self.get_z()})
+        total_intens = df['intens'].sum()
+        conditions = ((df['mz'] >= rect['mz_min']) & (df['mz'] <= rect['mz_max']) &
+                      (df['rt'] >= rect['rt_min']) & (df['rt'] <= rect['rt_max']))
+        df = df[conditions]
+        area_intens = df['intens'].sum()
+
+        avg_mz = (df['mz'] * df['intens']).sum() / area_intens
+
+        return area_intens, total_intens, avg_mz
+
+    def get_selected_area_total(self, rect):
+        df = pd.DataFrame({'mz': self.get_y(), 'rt': self.get_x(), 'intens': self.get_z()})
+        total_intens = df['intens'].sum()
+        conditions = ((df['mz'] >= rect['mz_min']) & (df['mz'] <= rect['mz_max']) &
+                      (df['rt'] >= rect['rt_min']) & (df['rt'] <= rect['rt_max']))
+        df = df[conditions]
+        area_intens = df['intens'].sum()
+        return area_intens, total_intens
+
+    def get_total_area_adduct(self, rect, charge):
+        r = rect.copy()
+        r['mz_min'] = rect['mz_min'] * charge + charge
+        r['mz_max'] = rect['mz_max'] * charge + charge
+
+        s, total_intens = 0, 0
+        for i in range(1, 101):
+            rect_i = {
+                'mz_min': (r['mz_min'] - i) / i,
+                'mz_max': (r['mz_max'] - i) / i,
+                'rt_min': r['rt_min'],
+                'rt_max': r['rt_max']
+            }
+            area_intens, total_intens = self.get_selected_area_total(rect_i)
+            #print(rect_i)
+            #print(area_intens, total_intens, i)
+            s += area_intens
+        return s, total_intens
+
     def add_mz_area(self, name, sequence, rect_points):
         rect = self.get_rect_borders(rect_points)
 
@@ -546,6 +587,80 @@ class mzdataBuilder():
             d['rect area%'] = tag['rect area%']
             out.append(d)
         return out
+
+    def add_mz_adduct_to_tab(self, rowdata, rect_points):
+        rect = self.get_rect_borders(rect_points['points'])
+        sel_area, total_area, avg_mz = self.get_selected_area(rect_points['points'])
+
+        if len(rowdata) > 0:
+            out = rowdata.copy()
+        else:
+            out = []
+        out.append(
+            {
+                'adduct name': 'new',
+                'mz rect': json.dumps(rect),
+                'mz': round(avg_mz, 2),
+                'area': round(sel_area, 1),
+                'charge': 1,
+                'mass': round(avg_mz + 1, 1),
+                'area%': round(sel_area * 100 / total_area, 2),
+                'area total mz %': 0
+            }
+        )
+        return out
+
+    def update_mass_tab_(self, rowdata, selrowdata):
+        out = []
+
+        ref_mass = 0.
+
+        if len(selrowdata) > 0:
+            ref_mass = selrowdata[0]['mass']
+        else:
+            if len(rowdata) > 0:
+                ref_mass = rowdata[0]['mass']
+
+        for row in rowdata:
+            d = row.copy()
+            d['mass'] = round(row['mz'] * row['charge'] + row['charge'], 2)
+            d['delta'] = round(d['mass'] - ref_mass, 2)
+            area_, total_area_ = self.get_total_area_adduct(json.loads(row['mz rect']), row['charge'])
+            d['area total mz %'] = round(area_ * 100 / total_area_, 2)
+            d['norm area %'] = d['area total mz %']
+            out.append(d)
+        return out
+
+    def get_total_adduct_area_purity(self, rowdata):
+        s = 0.
+        for row in rowdata:
+            s += row['area total mz %'] / 100
+        return round(s * 100, 2)
+
+    def delete_lcms_adduct_tag(self, rowdata, selrowdata):
+        out = []
+        for row in rowdata:
+            ctrl = True
+            for sel in selrowdata:
+                if row['mz rect'] == sel['mz rect']:
+                    ctrl = False
+                    break
+            if ctrl:
+                out.append(row)
+        return out
+
+    def normalization_adduct_purities(self, rowdata, norm_cf):
+        out = []
+        total = sum([row['area total mz %'] for row in rowdata])
+        for row in rowdata:
+            d = row.copy()
+            d['norm area %'] = round(row['area total mz %'] * float(norm_cf) / total, 2)
+            out.append(d)
+        return out
+
+    def save_adduct_report_to_csv(self, filename, rowdata):
+        df = pd.DataFrame(rowdata)
+        df.to_csv(filename, sep='\t', index=False)
 
     def get_mz_tab(self, sequence, rect_points, mz_find_wind):
         rect = self.get_rect_borders(rect_points)

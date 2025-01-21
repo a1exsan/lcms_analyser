@@ -6,6 +6,9 @@ import frontend_map_tabs
 import frontend_stock
 import frontend_edit_external_mods
 import frontend_view_passport
+import frontend_lcms_adducts
+
+import dash_ag_grid as dag
 
 
 class oligo_lcms_layout():
@@ -469,6 +472,8 @@ class oligo_lcms_layout():
                 ])
         )
 
+        self.mzdata_adducts = frontend_lcms_adducts.oligo_lcms_adducts_tab()
+
         self.mz_tab_content = dbc.Card(
     dbc.CardBody(
         [
@@ -501,6 +506,7 @@ class oligo_lcms_layout():
                 dbc.Tab(self.tagging_param_board, label="data tagging"),
                 dbc.Tab(self.finding_fragments_board, label="fragments finding"),
                 dbc.Tab(self.mzdata_ident_board, label="mz identifying"),
+                dbc.Tab(self.mzdata_adducts.layout, label="mz adducts"),
                 dbc.Tab(self.db_content_board, label="data base content"),
             ]
         )
