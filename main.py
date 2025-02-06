@@ -11,11 +11,11 @@ import backend_stock
 
 from backend_oligomaps import NumpyEncoder
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
-#stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
+stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
 
-oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
-stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
+#stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
@@ -673,6 +673,7 @@ def update_flags_tab(pincode, map_rowdata, sel_map_rowdata,
 
     if triggered_id == 'asm2000-update-oligomap-status-btn' and update_omap_status_btn is not None:
         out_map_data = oligo_maps.update_oligomap_status(map_rowdata)
+        oligo_maps.update_order_status(map_rowdata)
         return out_map_data
 
     if triggered_id == 'asm2000-set-volume-btn' and set_volume_btn is not None:
