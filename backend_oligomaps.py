@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 from oligoMass import molmassOligo as mmo
+from datetime import datetime
 
 class NumpyEncoder(json.JSONEncoder):
     """ Special json encoder for numpy types """
@@ -208,6 +209,7 @@ class oligomaps_local_db():
             for row in rowData:
                 out.append(row)
                 #if not out[-1]['DONE']:
+                out[-1]['Date'] = datetime.now().date().strftime('%d.%m.%Y')
                 out[-1]['Status'] = self.get_order_status(row)
                 if out[-1]['Status'] == 'finished':
                     out[-1]['DONE'] = True
