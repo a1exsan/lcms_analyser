@@ -75,6 +75,7 @@ class oligo_maps_tab():
                 'Done subl': [False],
                 'DONE': [False],
                 'Wasted': [False],
+                'Send': [False],
             }
         )
 
@@ -117,7 +118,9 @@ class oligo_maps_tab():
             {"field": "Do subl", 'editable': False},
             {"field": "Done subl", 'editable': True},
             {"field": "DONE", 'editable': False},
-            {"field": "Wasted", 'editable': True}
+            {"field": "Wasted", 'editable': True},
+            {"field": "Send", 'editable': True},
+
         ]
 
 

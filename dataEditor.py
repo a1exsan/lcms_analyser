@@ -792,5 +792,3 @@ class reversPrimer():
         seq = seq.replace('T', 'U')
         seq = [f'r{i}' for i in list(seq)]
         return ''.join(seq)
-
-

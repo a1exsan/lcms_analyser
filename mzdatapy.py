@@ -3,6 +3,7 @@ import base64, struct
 from tqdm import tqdm
 import numpy as np
 import io
+import pandas as pd
 
 class spec_data():
 
@@ -140,8 +141,32 @@ def NTP_analysis():
     data, vec = spec.mzdata2tab()
     print(data)
 
+def convert_ms1_mzdata_to_csv(filename):
+    data = mzdata(filename)
+    arr, vec = data.mzdata2tab(int_treshold=500, max_mz=4200, rt_left=10)
+    df = pd.DataFrame({
+        'rt(sec)': arr[:, 0],
+        'mz': arr[:, 1],
+        'intens': arr[:, 2]
+                       })
+    df.to_csv(filename + '.csv', sep='\t', index=False)
+    print(df)
+
+
+def convert_data():
+    #path = '/home/alex/Documents/LCMS/oligos/synt'
+    path = '/home/alex/Documents/Biolabmix/2025/VBEST/new/'
+    file_list = [
+        '1031_3_2.mzdata.xml',
+        '1031_6_2.mzdata.xml',
+        '1026_12_2.mzdata.xml'
+                 ]
+    for filename in file_list:
+        convert_ms1_mzdata_to_csv(f"{path}{filename}")
+
 
 
 
 if __name__ == '__main__':
     NTP_analysis()
+    #convert_data()
