@@ -42,6 +42,7 @@ class oligo_maps_tab():
         map_tab = pd.DataFrame(
             {
                 '#': [0],
+                'map #': [0],
                 'Order id': [0],
                 'Position': [''],
                 'Name': [''],
@@ -86,6 +87,7 @@ class oligo_maps_tab():
                 "headerCheckboxSelection": True,
                 "headerCheckboxSelectionFilteredOnly": True,
             },
+            {"field": "map #"},
             {"field": "Order id", 'editable': False},
             {"field": "Position", 'editable': False},
             {"field": "Name", 'editable': False},
