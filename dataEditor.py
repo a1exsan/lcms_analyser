@@ -247,6 +247,7 @@ class mzdataBuilder():
 
         df = pd.DataFrame(data['init_data'])
         self.init_data = np.array([[rt, mz, intens] for rt, mz, intens in zip(df['rt'], df['mz'], df['intens'])])
+        self.data = np.array([[rt, mz, intens] for rt, mz, intens in zip(df['rt'], df['mz'], df['intens'])])
         #print(self.init_data)
         self.deconv_data = pd.DataFrame(data['deconv_data'])
 
