@@ -248,6 +248,7 @@ class mzdataBuilder():
         df = pd.DataFrame(data['init_data'])
         self.init_data = np.array([[rt, mz, intens] for rt, mz, intens in zip(df['rt'], df['mz'], df['intens'])])
         self.data = np.array([[rt, mz, intens] for rt, mz, intens in zip(df['rt'], df['mz'], df['intens'])])
+        self.bkg = self.extract_bkg_from_init_data(self.init_data)
         #print(self.init_data)
         self.deconv_data = pd.DataFrame(data['deconv_data'])
 
@@ -265,6 +266,17 @@ class mzdataBuilder():
         d['mass_tags'] = self.text_to_mass_tags(self.mass_tags_to_text())
         d['mz_tags'] = self.mz_tags
         return d
+
+    def extract_bkg_from_init_data(self, init_data):
+        df = pd.DataFrame({
+            'rt': init_data[:, 0],
+            'mz': init_data[:, 1],
+            'intens': init_data[:, 2],
+        })
+        vec = [0 for i in range(int(round(df['mz'].max() + 1, 0)))]
+        for d in init_data:
+            vec[int(round(d[1], 0))] += 1
+        return vec
 
     def to_pickle(self, fn):
         with open(fn, 'wb') as f:
@@ -361,7 +373,7 @@ class mzdataBuilder():
 
         params = self.get_polishing_params()
         data_text = self.data_to_string(self.data)
-        self.db_admin.update_insert_polishing_2(data_text, datetime.now(), params)
+        #self.db_admin.update_insert_polishing_2(data_text, datetime.now(), params)
 
     def get_polishing_params(self):
         return {
@@ -424,7 +436,7 @@ class mzdataBuilder():
 
         params = self.get_deconv_params()
         content = self.dataframe_to_text(self.deconv_data)
-        self.db_admin.update_insert_deconvolution(content, datetime.now(), params)
+        #self.db_admin.update_insert_deconvolution(content, datetime.now(), params)
 
         return self.deconv_data, self.deconv
 

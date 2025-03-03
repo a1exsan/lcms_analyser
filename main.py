@@ -11,11 +11,11 @@ import backend_stock
 
 from backend_oligomaps import NumpyEncoder
 
-#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.17.250', db_port='8012')
-#stock_data = backend_stock.stock_manager(db_IP='192.168.17.250', db_port='8012')
+oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='192.168.16.145', db_port='8012')
+stock_data = backend_stock.stock_manager(db_IP='192.168.16.145', db_port='8012')
 
-oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
-stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
+#oligo_maps = backend_oligomaps.oligomaps_local_db(db_IP='127.0.0.1', db_port='8012')
+#stock_data = backend_stock.stock_manager(db_IP='127.0.0.1', db_port='8012')
 
 data = de.mzdataBuilder()
 
